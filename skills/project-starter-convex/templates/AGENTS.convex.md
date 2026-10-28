@@ -6,6 +6,8 @@
 - Core functions take the context as their first argument, typed `QueryCtx`, `MutationCtx` or `ActionCtx` (or the matching authenticated custom context). The `Fn` suffix is mandatory because the wrapper and the core function often share a name.
 - Define custom functions with `zCustomQuery` / `zCustomMutation` / `zCustomAction` from `convex-helpers/server/zod4` so every function validates its args with Zod.
 - Convex functions read environment variables only through `env` from `<convex dir>/env.ts`. New variables go into its schema and are set with `npx convex env set`.
+- The schema is Zod. Define every table with `zodTable(name, { ...zod fields })` from `<convex dir>/lib/zod-table.ts` and register it with `<table>.table()` (plus indexes) in `defineSchema`. Never use `defineTable` with `v.*` validators directly. Use `zid("table")` for ids.
+- Derive arg and return schemas from the table: `<table>.schema` (full doc), `<table>.insertSchema`, `<table>.updateSchema`.
 - When deriving arg schemas from table schemas, prefer `.pick()` over `.omit()`.
 - Frontend: call Convex only through TanStack Query, `useQuery(convexQuery(api.x.y, args))` and `useMutation({ mutationFn: useConvexMutation(api.x.y) })`. Read failures with `getAppError(error)` and branch with `matchError`.
 

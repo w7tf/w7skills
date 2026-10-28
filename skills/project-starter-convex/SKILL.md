@@ -43,6 +43,12 @@ monorepo (e.g. `packages/backend/convex/`).
    as the `QueryClient`'s `queryKeyHashFn` / `queryFn` defaults, call
    `convexQueryClient.connect(queryClient)`, and wrap the app in `ConvexProvider`.
 3. Copy [templates/result.ts](templates/result.ts) to `<convex dir>/lib/result.ts`.
+   Copy [templates/zod-table.ts](templates/zod-table.ts) to `<convex dir>/lib/zod-table.ts`.
+   The schema is defined in Zod: if there is no `<convex dir>/schema.ts`, copy
+   [templates/schema.ts](templates/schema.ts) there; if there is one, rewrite each
+   `defineTable(...)` as a `zodTable(...)` with the same fields (`v.*` validators become their
+   `z.*` equivalents, `v.id("x")` becomes `zid("x")` from `convex-helpers/server/zod4`) and keep its
+   indexes on `.table()`.
 4. Copy [templates/app-error.ts](templates/app-error.ts) to the frontend's `src/lib/app-error.ts`
    and point its `SerializedError` import at `<convex dir>/core/errors`.
 5. Create `<convex dir>/functions.ts` with Zod custom functions from
@@ -94,6 +100,8 @@ convex/
     todo.ts
   lib/
     result.ts    unwrapOrThrow
+    zod-table.ts zodTable: Zod schema + Convex table from one definition
+  schema.ts      tables defined with zodTable
   env.ts         t3-env schema for the deployment's variables
   functions.ts   Zod custom query/mutation/action builders
   todo.ts        thin wrappers only

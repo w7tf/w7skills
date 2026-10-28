@@ -14,7 +14,7 @@ Both starters run the core setup first and then add their backend layer:
   `<name>Fn` functions behind thin wrappers, TanStack Query / Form / Table, shadcn + reui, no
   subtitles under headings unless asked, and the `frontend-design` skill installed.
 - **TanStack Start:** `createServerFn` wrappers in `src/server/` over `src/core/<name>Fn`.
-- **Convex:** Convex query/mutation/action wrappers over `convex/core/<name>Fn`, TanStack Query
+- **Convex:** the schema defined in Zod with `zodTable`, Convex query/mutation/action wrappers over `convex/core/<name>Fn`, TanStack Query
   through `@convex-dev/react-query`, and verified Convex components before custom code.
 
 Each starter actually runs the setup (installs dependencies, configures shadcn + reui, installs
