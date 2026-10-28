@@ -1,5 +1,5 @@
 import { defineTable } from "convex/server";
-import { zid, zodToConvex } from "convex-helpers/server/zod4";
+import { zid, zodOutputToConvex } from "convex-helpers/server/zod4";
 import * as z from "zod";
 
 export const zodTable = <
@@ -18,14 +18,13 @@ export const zodTable = <
 	return {
 		tableName,
 		schema: fullSchema,
-		insertSchema: fullSchema.partial({
-			_id: true,
-			_creationTime: true,
-		}),
+		// Convex sets `_id` and `_creationTime`; `db.insert` rejects them.
+		insertSchema: z.object(schema),
 		updateSchema: fullSchema.omit({ _id: true, _creationTime: true }).partial(),
 		table: () => {
 			// Convex adds system fields; table validators describe writable fields.
-			return defineTable(zodToConvex(z.object(schema)));
+			// The output type is what gets stored, so defaults and transforms apply.
+			return defineTable(zodOutputToConvex(z.object(schema)));
 		},
 	};
 };

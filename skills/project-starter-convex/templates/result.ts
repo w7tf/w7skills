@@ -11,6 +11,8 @@ export function unwrapOrThrow<T, E extends { _tag: string; message: string }>(
 	return result.match({
 		ok: (value) => value,
 		err: (error) => {
+			// Keep the full error (cause, payload) in the Convex logs only.
+			console.error(error);
 			throw new ConvexError<SerializedError>(serializeError(error));
 		},
 	});

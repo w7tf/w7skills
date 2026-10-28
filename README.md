@@ -1,6 +1,7 @@
 # w7skills
 
-Agent skills for starting new projects with the w7 stack.
+Agent skills for starting new projects with the w7 stack. Every project is built on TanStack
+Start, either with Convex as the backend or on its own:
 
 | Skill | Use it for |
 | --- | --- |

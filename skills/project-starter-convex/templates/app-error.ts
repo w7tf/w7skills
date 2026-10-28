@@ -1,12 +1,8 @@
 import { ConvexError } from "convex/values";
-import type { SerializedError } from "@backend/core/errors";
+import { type ClientError, toClientError } from "@backend/core/errors";
 
-// Client side: read the serialized core error out of a failed Convex call.
-// The result keeps `_tag`, so it can be passed to `matchError`.
-export function getAppError(error: unknown): SerializedError {
-	if (error instanceof ConvexError) return error.data as SerializedError;
-	return {
-		_tag: "UnknownError",
-		message: error instanceof Error ? error.message : String(error),
-	};
+// Client side: read the core error out of a failed Convex call. The result has
+// a closed `_tag` union, so `matchError` on it is exhaustive.
+export function getAppError(error: unknown): ClientError {
+	return toClientError(error instanceof ConvexError ? error.data : error);
 }

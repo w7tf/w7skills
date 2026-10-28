@@ -1,6 +1,6 @@
 ---
 name: project-starter-convex
-description: Set up a new TanStack Start + Convex project. Runs the project-starter-core setup, then scaffolds convex/core <name>Fn business logic behind thin Convex query/mutation/action wrappers with better-result, wires TanStack Query to Convex, and makes verified Convex components the first choice before custom code. Use when starting or bootstrapping a project that uses Convex.
+description: Set up a new TanStack Start + Convex project. Runs the project-starter-core setup, then scaffolds convex/core <name>Fn business logic behind thin Convex query/mutation/action wrappers with better-result, wires TanStack Query to Convex, and makes verified Convex components the first choice before custom code. Use when starting or bootstrapping a TanStack Start + Convex project, or any new project that uses Convex.
 ---
 
 # Project starter: Convex
@@ -50,7 +50,7 @@ monorepo (e.g. `packages/backend/convex/`).
    `z.*` equivalents, `v.id("x")` becomes `zid("x")` from `convex-helpers/server/zod4`) and keep its
    indexes on `.table()`.
 4. Copy [templates/app-error.ts](templates/app-error.ts) to the frontend's `src/lib/app-error.ts`
-   and point its `SerializedError` import at `<convex dir>/core/errors`.
+   and point its `@backend/core/errors` import at `<convex dir>/core/errors`.
 5. Create `<convex dir>/functions.ts` with Zod custom functions from
    `convex-helpers/server/zod4` (`zCustomQuery`, `zCustomMutation`, `zCustomAction`). If the
    project has auth, add `authenticatedQuery` / `authenticatedMutation` / `authenticatedAction`
@@ -84,7 +84,7 @@ backend capability, look for a component at https://www.convex.dev/components (o
 - Only write a custom solution when no verified component fits, and tell the user which
   components you checked and why they did not fit.
 - Typical needs with components: rate limiting, action retries, workpools and queues, workflows,
-  aggregates and counters, migrations, crons, presence, auth, payments, email, AI agents, RAG.
+  aggregates and counters, migrations, crons, presence, payments, email, AI agents, RAG.
 
 ## 5. Verify and report
 
@@ -117,7 +117,7 @@ A wrapper does three things and nothing else:
 ```ts
 // convex/core/todo.ts
 import { Result } from "better-result";
-import type { z } from "zod";
+import type * as z from "zod";
 import type { AuthenticatedMutationCtx } from "../functions";
 import { todos } from "../schema";
 import { ValidationError } from "./errors";
@@ -146,10 +146,26 @@ export const create = authenticatedMutation({
 ```
 
 ```tsx
-// component
-const createTodoMutation = useMutation({
-	mutationFn: useConvexMutation(api.todo.create),
-	// getAppError returns the core error's `_tag` and `message`
-	onError: (error) => toast.error(getAppError(error).message),
+// route: prefetch on the server, read with suspense
+export const Route = createFileRoute("/todos")({
+	loader: ({ context }) => context.queryClient.ensureQueryData(convexQuery(api.todo.list, {})),
+	component: Todos,
 });
+
+function Todos() {
+	const { data: todos } = useSuspenseQuery(convexQuery(api.todo.list, {}));
+	const createTodoMutation = useMutation({
+		mutationFn: useConvexMutation(api.todo.create),
+		// getAppError returns a ClientError, so this match is exhaustive
+		onError: (error) =>
+			matchError(getAppError(error), {
+				ValidationError: (e) => toast.error(e.message),
+				UnauthorizedError: () => toast.error("Please sign in"),
+				ForbiddenError: (e) => toast.error(e.message),
+				NotFoundError: (e) => toast.error(e.message),
+				UnknownError: () => toast.error("Something went wrong"),
+			}),
+	});
+	// ...
+}
 ```

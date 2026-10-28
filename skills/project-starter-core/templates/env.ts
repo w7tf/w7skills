@@ -1,5 +1,5 @@
 import { createEnv } from "@t3-oss/env-core";
-import { z } from "zod";
+import * as z from "zod";
 
 // The only place environment variables are read. Import `env` from here
 // instead of using `process.env` or `import.meta.env` directly.

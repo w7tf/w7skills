@@ -13,7 +13,7 @@ export function unwrapOrThrow<T, E extends Error & { _tag: string }>(
 		err: (error) => {
 			// Keep the full error (cause, stack, payload) in the server logs only.
 			console.error(error);
-			throw toClientError(error);
+			throw toWireError(error);
 		},
 	});
 }
@@ -21,7 +21,7 @@ export function unwrapOrThrow<T, E extends Error & { _tag: string }>(
 // Seroval sends every own property of a thrown error to the browser, including
 // `stack` and `cause` (e.g. a database error). Send only `_tag` and `message`;
 // `matchError` still works on the client because `_tag` is kept.
-function toClientError(error: { _tag: string; message: string }) {
+function toWireError(error: { _tag: string; message: string }) {
 	const clientError = Object.assign(new Error(error.message), {
 		_tag: error._tag,
 	});

@@ -1,6 +1,6 @@
 ---
 name: project-starter-tanstack-start
-description: Set up a new TanStack Start project without Convex. Runs the project-starter-core setup, then scaffolds src/server/core <name>Fn business logic behind thin createServerFn wrappers with better-result. Use when starting or bootstrapping a TanStack Start app that does not use Convex.
+description: Set up a new TanStack Start project without Convex. Runs the project-starter-core setup, then scaffolds src/server/core <name>Fn business logic behind thin createServerFn wrappers with better-result. Use when starting or bootstrapping a TanStack Start app without Convex, or a new project that names TanStack Start alone.
 ---
 
 # Project starter: TanStack Start (no Convex)
@@ -73,12 +73,13 @@ error rethrown. A `Result` cannot be returned instead, because it is a class ins
 serialization. TanStack Start serializes thrown errors with seroval, which would send every own
 property, including `stack` and `cause` (e.g. a database error), to the browser. So
 `unwrapOrThrow` logs the full error on the server and throws a plain `Error` with only `_tag` and
-`message`, which still works with `matchError` on the client.
+`message`. On the client, `toClientError` (from core `errors.ts`) turns it into a `ClientError`
+for exhaustive `matchError`.
 
 ```ts
 // src/server/core/todo.ts
 import { Result, TaggedError } from "better-result";
-import { z } from "zod";
+import * as z from "zod";
 
 export class TodoWriteError extends TaggedError("TodoWriteError")<{
 	message: string;
@@ -88,13 +89,16 @@ export class TodoWriteError extends TaggedError("TodoWriteError")<{
 export const zCompleteTodoArgs = z.object({ id: z.string() });
 export type CompleteTodoArgs = z.infer<typeof zCompleteTodoArgs>;
 
-export async function completeTodoFn(ctx: AppContext, args: CompleteTodoArgs) {
-	const found = await findTodoFn(ctx, args.id); // Result<Todo, NotFoundError>
-	if (Result.isError(found)) return found;
-
-	return Result.tryPromise({
-		try: () => ctx.db.update(todos).set({ done: true }).where(eq(todos.id, found.value.id)),
-		catch: (cause) => new TodoWriteError({ message: "Could not update todo", cause }),
+export function completeTodoFn(ctx: AppContext, args: CompleteTodoArgs) {
+	return Result.gen(async function* () {
+		const todo = yield* Result.await(findTodoFn(ctx, args.id)); // NotFoundError
+		yield* Result.await(
+			Result.tryPromise({
+				try: () => ctx.db.update(todos).set({ done: true }).where(eq(todos.id, todo.id)),
+				catch: (cause) => new TodoWriteError({ message: "Could not update todo", cause }),
+			}),
+		);
+		return Result.ok({ ...todo, done: true });
 	});
 }
 ```
@@ -113,10 +117,28 @@ export const completeTodo = createServerFn({ method: "POST" })
 ```
 
 ```tsx
-// component
-const completeTodoMutation = useMutation({
-	mutationFn: (data: CompleteTodoArgs) => completeTodo({ data }),
-	// the core error, rethrown on the client with only `_tag` and `message`
-	onError: (error) => toast.error(error.message),
+// route: prefetch on the server, read with suspense
+const todosQuery = queryOptions({ queryKey: ["todos"], queryFn: () => getTodos() });
+
+export const Route = createFileRoute("/todos")({
+	loader: ({ context }) => context.queryClient.ensureQueryData(todosQuery),
+	component: Todos,
 });
+
+function Todos() {
+	const { data: todos } = useSuspenseQuery(todosQuery);
+	const completeTodoMutation = useMutation({
+		mutationFn: (data: CompleteTodoArgs) => completeTodo({ data }),
+		// toClientError gives a closed `_tag` union, so this match is exhaustive
+		onError: (error) =>
+			matchError(toClientError(error), {
+				NotFoundError: (e) => toast.error(e.message),
+				UnauthorizedError: () => toast.error("Please sign in"),
+				ForbiddenError: (e) => toast.error(e.message),
+				ValidationError: (e) => toast.error(e.message),
+				UnknownError: () => toast.error("Something went wrong"),
+			}),
+	});
+	// ...
+}
 ```

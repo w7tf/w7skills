@@ -1,11 +1,12 @@
 ---
 name: project-starter-core
-description: Shared setup and rules for every new w7 web project (better-result, t3-env, core <name>Fn functions behind thin wrappers, TanStack Query/Form/Table, shadcn + reui, frontend-design skill). Used by project-starter-tanstack-start and project-starter-convex; run one of those instead of this directly.
+description: Shared setup and rules for every new w7 web project, which is always TanStack Start, with or without Convex (better-result, t3-env, core <name>Fn functions behind thin wrappers, TanStack Query/Form/Table, shadcn + reui, frontend-design skill). Used by project-starter-tanstack-start and project-starter-convex; run one of those instead of this directly.
 ---
 
 # Project starter: core
 
-This is the shared base for new projects. It is normally run as the first half of
+This is the shared base for new projects. Every w7 project is TanStack Start, either with Convex
+(`project-starter-convex`) or on its own (`project-starter-tanstack-start`). It is normally run as the first half of
 `project-starter-tanstack-start` or `project-starter-convex`. Those skills add the backend-specific
 part (where the thin wrappers live and what they wrap).
 
@@ -104,15 +105,22 @@ These apply to all code written in the project afterwards.
 - **Handle errors by matching.** Branch on errors with exhaustive `error.match({...})` /
   `matchError(error, {...})` so a new error variant fails the typecheck. Use `matchErrorPartial`
   only when you deliberately handle a subset. Never `if (error._tag === ...)` chains, never
-  `instanceof` checks. See https://better-result.dev/errors/matching-errors.
+  `instanceof` checks on domain errors (`instanceof` on a transport error such as `ConvexError`
+  is fine). In the frontend, turn a failed call into a `ClientError` first (`toClientError` from
+  core `errors.ts`), whose `_tag` is a closed union, so the match stays exhaustive. See
+  https://better-result.dev/errors/matching-errors.
 - **Thin wrappers over core `<name>Fn` functions.** All business logic lives in the core folder.
   Every core function is named `<name>Fn` (e.g. `createInvoiceFn`). Server functions, queries,
   mutations and actions are thin wrappers: validate input, resolve auth/context, call the `Fn`,
   turn its `Result` into the transport's success/error. No business logic in the wrapper.
-- **t3-env for all environment variables.** Read variables only through the `env` object from
-  `src/env.ts` (Convex: `<convex dir>/env.ts`). Every new variable is added to its schema and to
+- **t3-env for all environment variables.** Read variables only through the `env` object of the
+  project's env module: `src/env.ts`, or the backend's own env module when the variant adds one
+  (Convex: `<convex dir>/env.ts`). Every new variable is added to its schema and to
   `.env.example`. Never read `process.env` or `import.meta.env` directly.
 - **TanStack Query** for every data fetch and mutation in the frontend. No `useEffect` fetching.
+  On routes, prefetch in the loader with `context.queryClient.ensureQueryData(...)` and read with
+  `useSuspenseQuery(...)`, so server-rendered pages arrive with their data.
+- **Zod 4 imports.** Always `import * as z from "zod"`.
 - **TanStack Form** for every form, rendered with the shadcn `Field` components.
 - **TanStack Table** for every table; prefer the reui data grid on top of it.
 - **shadcn + reui.** Use shadcn components, and use reui components whenever reui has one.

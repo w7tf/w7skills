@@ -9,11 +9,11 @@
 - The schema is Zod. Define every table with `zodTable(name, { ...zod fields })` from `<convex dir>/lib/zod-table.ts` and register it with `<table>.table()` (plus indexes) in `defineSchema`. Never use `defineTable` with `v.*` validators directly. Use `zid("table")` for ids.
 - Derive arg and return schemas from the table: `<table>.schema` (full doc), `<table>.insertSchema`, `<table>.updateSchema`.
 - When deriving arg schemas from table schemas, prefer `.pick()` over `.omit()`.
-- Frontend: call Convex only through TanStack Query, `useQuery(convexQuery(api.x.y, args))` and `useMutation({ mutationFn: useConvexMutation(api.x.y) })`. Read failures with `getAppError(error)` and branch with `matchError`.
+- Frontend: call Convex only through TanStack Query. Route data: `context.queryClient.ensureQueryData(convexQuery(api.x.y, args))` in the loader and `useSuspenseQuery(convexQuery(api.x.y, args))` in the component. Mutations: `useMutation({ mutationFn: useConvexMutation(api.x.y) })`. Read failures with `getAppError(error)` (a `ClientError`) and branch with exhaustive `matchError`.
 
 ### Convex components first
 
-Before custom-coding any backend capability (rate limiting, retries, workpools/queues, crons, aggregates/counters, migrations, sharded counters, presence, file storage helpers, auth, payments, email, search, AI agents, workflows, ...), check https://www.convex.dev/components for an existing component. If a **verified** component covers the need, use it: `pnpm add @convex-dev/<component>`, register it with `app.use(...)` in `convex.config.ts`, and wrap its API in core `<name>Fn` functions like any other dependency. Custom code is only acceptable when no verified component fits; say which components were checked and why they did not fit. Use the `components-guide` skill for details.
+Before custom-coding any backend capability (rate limiting, retries, workpools/queues, crons, aggregates/counters, migrations, sharded counters, presence, file storage helpers, payments, email, search, AI agents, workflows, ...), check https://www.convex.dev/components for an existing component. If a **verified** component covers the need, use it: `<pm> add @convex-dev/<component>`, register it with `app.use(...)` in `convex.config.ts`, and wrap its API in core `<name>Fn` functions like any other dependency. Custom code is only acceptable when no verified component fits; say which components were checked and why they did not fit. Use the `components-guide` skill for details.
 
 Example:
 

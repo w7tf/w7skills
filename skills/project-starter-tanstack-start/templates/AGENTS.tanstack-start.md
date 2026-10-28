@@ -6,7 +6,7 @@
 - Never return a `Result` from a server function: it does not serialize. Throwing is the TanStack Start way. Never throw a core error directly either: TanStack Start sends its `stack` and `cause` to the browser. `unwrapOrThrow` logs it on the server and throws only `_tag` and `message`.
 - Auth and request context come from middleware (`.middleware([...])`) and are passed into the `Fn` as its first argument. Core functions never read the request themselves.
 - Core functions do not import from `@tanstack/react-start`. They must be callable from tests, scripts and other core functions.
-- Frontend calls server functions only through TanStack Query: `useQuery({ queryKey, queryFn: () => getTodos() })`, `useMutation({ mutationFn: (data) => createTodo({ data }) })`. Branch on failures with `matchError` on the thrown error.
+- Frontend calls server functions only through TanStack Query. Route data: a `queryOptions({ queryKey, queryFn: () => getTodos() })` prefetched with `context.queryClient.ensureQueryData(...)` in the loader and read with `useSuspenseQuery(...)`. Mutations: `useMutation({ mutationFn: (data) => createTodo({ data }) })`. Branch on failures with exhaustive `matchError(toClientError(error), { ... })`; `toClientError` comes from `src/server/core/errors.ts` (it has no server-only imports).
 
 Example:
 
@@ -31,6 +31,6 @@ export const createTodo = createServerFn({ method: "POST" })
 // component
 const createTodoMutation = useMutation({
 	mutationFn: (data: CreateTodoArgs) => createTodo({ data }),
-	onError: (error) => toast.error(error.message),
+	onError: (error) => toast.error(toClientError(error).message),
 });
 ```
