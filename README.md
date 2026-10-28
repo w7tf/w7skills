@@ -13,7 +13,8 @@ Both starters run the core setup first and then add their backend layer:
 - **Core:** better-result with exhaustive error matching, t3-env for environment variables, business logic in a core folder as
   `<name>Fn` functions behind thin wrappers, TanStack Query / Form / Table, shadcn + reui, no
   subtitles under headings unless asked, and the `frontend-design` skill installed.
-- **TanStack Start:** `createServerFn` wrappers in `src/server/` over `src/core/<name>Fn`.
+- **TanStack Start:** `createServerFn` wrappers in `src/server/` over `src/server/core/<name>Fn`,
+  throwing core errors the way TanStack Start expects.
 - **Convex:** the schema defined in Zod with `zodTable`, Convex query/mutation/action wrappers over `convex/core/<name>Fn`, TanStack Query
   through `@convex-dev/react-query`, and verified Convex components before custom code.
 

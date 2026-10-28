@@ -1,16 +1,17 @@
 
 ## Backend: TanStack Start server functions
 
-- Core business logic: `src/core/<domain>.ts`. Server functions: `src/server/<domain>.ts`.
-- A server function is `createServerFn(...).inputValidator(z<Name>Args).handler(...)` whose handler only calls the core `<name>Fn` and returns `toServerResult(...)` from `src/lib/server-result.ts`.
+- Everything server-side lives in `src/server/`. Business logic: `src/server/core/<domain>.ts`. Server functions: `src/server/<domain>.ts`.
+- A server function is `createServerFn(...).inputValidator(z<Name>Args).handler(...)` whose handler only returns `unwrapOrThrow(await <name>Fn(context, data))` from `src/server/lib/result.ts`.
+- Never return a `Result` from a server function: it does not serialize. Throwing the core error is the TanStack Start way; it reaches the client with `_tag`, `message` and payload intact.
 - Auth and request context come from middleware (`.middleware([...])`) and are passed into the `Fn` as its first argument. Core functions never read the request themselves.
 - Core functions do not import from `@tanstack/react-start`. They must be callable from tests, scripts and other core functions.
-- Frontend calls server functions only through TanStack Query, with `unwrapServerResult(...)` as the query/mutation function body.
+- Frontend calls server functions only through TanStack Query: `useQuery({ queryKey, queryFn: () => getTodos() })`, `useMutation({ mutationFn: (data) => createTodo({ data }) })`. Branch on failures with `matchError` on the thrown error.
 
 Example:
 
 ```ts
-// src/core/todo.ts
+// src/server/core/todo.ts
 export const zCreateTodoArgs = z.object({ title: z.string().min(1) });
 export type CreateTodoArgs = z.infer<typeof zCreateTodoArgs>;
 
@@ -25,10 +26,11 @@ export async function createTodoFn(ctx: AppContext, args: CreateTodoArgs) {
 export const createTodo = createServerFn({ method: "POST" })
 	.middleware([authMiddleware])
 	.inputValidator(zCreateTodoArgs)
-	.handler(async ({ context, data }) => toServerResult(await createTodoFn(context, data)));
+	.handler(async ({ context, data }) => unwrapOrThrow(await createTodoFn(context, data)));
 
 // component
 const createTodoMutation = useMutation({
-	mutationFn: (data: CreateTodoArgs) => unwrapServerResult(createTodo({ data })),
+	mutationFn: (data: CreateTodoArgs) => createTodo({ data }),
+	onError: (error) => toast.error(error.message),
 });
 ```
