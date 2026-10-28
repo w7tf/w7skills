@@ -34,7 +34,9 @@ core-folder step:
    Fix the `@/core/errors` import if the project uses a different alias.
 2. Append [templates/AGENTS.tanstack-start.md](templates/AGENTS.tanstack-start.md) to the
    project's `AGENTS.md`.
-3. If the project has auth, create `src/server/middleware.ts` with an `authMiddleware` built with
+3. Put the server-only secrets the server functions need (database URL, API keys) in the `server`
+   schema of `src/env.ts`, and import `env` in core functions instead of reading `process.env`.
+4. If the project has auth, create `src/server/middleware.ts` with an `authMiddleware` built with
    `createMiddleware({ type: "function" })` that resolves the user and passes it on via
    `next({ context: { user } })`. If there is no auth yet, leave a comment in
    `src/server/middleware.ts` saying where it goes and skip it.

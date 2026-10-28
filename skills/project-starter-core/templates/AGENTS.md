@@ -9,6 +9,12 @@
 - Branch on errors only with exhaustive matching: `error.match({ ... })` or `matchError(error, { ... })`. Use `matchErrorPartial` only when deliberately handling a subset. No `_tag === ...` chains, no `instanceof`.
 - Docs: https://better-result.dev/errors/matching-errors
 
+## Environment variables: t3-env
+
+- Read environment variables only through `env` from `src/env.ts` (`@t3-oss/env-core`). Never read `process.env` or `import.meta.env` directly.
+- Every new variable goes into the `server` or `client` schema there, and into `.env.example`. Client variables start with `VITE_`.
+- Docs: https://env.t3.gg/docs/core
+
 ## Thin wrappers over core functions
 
 - All business logic lives in the core folder.

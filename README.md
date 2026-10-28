@@ -10,7 +10,7 @@ Agent skills for starting new projects with the w7 stack.
 
 Both starters run the core setup first and then add their backend layer:
 
-- **Core:** better-result with exhaustive error matching, business logic in a core folder as
+- **Core:** better-result with exhaustive error matching, t3-env for environment variables, business logic in a core folder as
   `<name>Fn` functions behind thin wrappers, TanStack Query / Form / Table, shadcn + reui, no
   subtitles under headings unless asked, and the `frontend-design` skill installed.
 - **TanStack Start:** `createServerFn` wrappers in `src/server/` over `src/core/<name>Fn`.

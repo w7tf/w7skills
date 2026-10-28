@@ -36,7 +36,7 @@ monorepo (e.g. `packages/backend/convex/`).
 1. Install the Convex dependencies in the app (and the backend package in a monorepo):
 
    ```bash
-   <pm> add convex @convex-dev/react-query convex-helpers zod
+   <pm> add convex @convex-dev/react-query convex-helpers zod @t3-oss/env-core
    ```
 
 2. Wire Convex into TanStack Query if the template did not: create a `ConvexQueryClient`, set it
@@ -49,15 +49,20 @@ monorepo (e.g. `packages/backend/convex/`).
    `convex-helpers/server/zod4` (`zCustomQuery`, `zCustomMutation`, `zCustomAction`). If the
    project has auth, add `authenticatedQuery` / `authenticatedMutation` / `authenticatedAction`
    that resolve the user and put it on `ctx`, and export their ctx types.
-6. Install the Convex agent skills, which include `components-guide`:
+6. Copy [templates/convex-env.ts](templates/convex-env.ts) to `<convex dir>/env.ts` and add the
+   deployment's variables to it (Convex functions cannot use the frontend's `src/env.ts`). Set
+   the values with `npx convex env set NAME value` before the next push, because validation runs
+   when Convex loads the module. Add `VITE_CONVEX_URL` to the `client` schema of `src/env.ts` and
+   read the Convex URL from `env.VITE_CONVEX_URL`.
+7. Install the Convex agent skills, which include `components-guide`:
 
    ```bash
    npx skills add get-convex/agent-skills -y
    ```
 
-7. Append [templates/AGENTS.convex.md](templates/AGENTS.convex.md) to the project's `AGENTS.md`,
+8. Append [templates/AGENTS.convex.md](templates/AGENTS.convex.md) to the project's `AGENTS.md`,
    replacing `<convex dir>` with the real path.
-8. Run `npx convex dev --once` to generate `_generated/`. If it needs a login or a project
+9. Run `npx convex dev --once` to generate `_generated/`. If it needs a login or a project
    selection, ask the user to run `npx convex dev` in their terminal once, and continue with the
    remaining steps.
 
@@ -89,6 +94,7 @@ convex/
     todo.ts
   lib/
     result.ts    unwrapOrThrow
+  env.ts         t3-env schema for the deployment's variables
   functions.ts   Zod custom query/mutation/action builders
   todo.ts        thin wrappers only
   convex.config.ts

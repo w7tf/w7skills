@@ -1,6 +1,6 @@
 ---
 name: project-starter-core
-description: Shared setup and rules for every new w7 web project (better-result, core <name>Fn functions behind thin wrappers, TanStack Query/Form/Table, shadcn + reui, frontend-design skill). Used by project-starter-tanstack-start and project-starter-convex; run one of those instead of this directly.
+description: Shared setup and rules for every new w7 web project (better-result, t3-env, core <name>Fn functions behind thin wrappers, TanStack Query/Form/Table, shadcn + reui, frontend-design skill). Used by project-starter-tanstack-start and project-starter-convex; run one of those instead of this directly.
 ---
 
 # Project starter: core
@@ -24,7 +24,7 @@ done (dependency present, file exists), skip it and say so in the summary.
 ## 1. Install dependencies
 
 ```bash
-<pm> add better-result zod @tanstack/react-query @tanstack/react-form @tanstack/react-table
+<pm> add better-result zod @t3-oss/env-core @tanstack/react-query @tanstack/react-form @tanstack/react-table
 <pm> add -D @tanstack/react-query-devtools
 ```
 
@@ -72,14 +72,22 @@ Create the core folder for business logic (the variant skill says where it lives
 [templates/errors.ts](templates/errors.ts) next to it as `errors.ts`. It defines the shared
 tagged errors that core functions return.
 
-## 5. Write the project rules
+## 5. Typed environment variables (t3-env)
+
+Copy [templates/env.ts](templates/env.ts) to `src/env.ts`. Move every variable the project
+already uses (from `.env*` files and existing `process.env` / `import.meta.env` reads) into its
+`server` or `client` schema, and replace those reads with `env.X`. Client variables must start with
+`VITE_`. Make sure `.env*.local` is in `.gitignore`, and keep a committed `.env.example` listing every
+variable with an empty or placeholder value. Docs: https://env.t3.gg/docs/core
+
+## 6. Write the project rules
 
 Copy [templates/AGENTS.md](templates/AGENTS.md) to the project root as `AGENTS.md`. If an
 `AGENTS.md` already exists, merge the sections in instead of overwriting. If the project uses
 Claude Code and has no `CLAUDE.md`, create one containing only `@AGENTS.md`.
 The variant skill appends its backend section to the same file.
 
-## 6. Verify and report
+## 7. Verify and report
 
 Run the project's typecheck (`<pm> run typecheck` or `<pm>x tsc --noEmit`). Fix what this setup
 broke. Then give the user a short summary: what was installed, what was skipped because it was
@@ -101,6 +109,9 @@ These apply to all code written in the project afterwards.
   Every core function is named `<name>Fn` (e.g. `createInvoiceFn`). Server functions, queries,
   mutations and actions are thin wrappers: validate input, resolve auth/context, call the `Fn`,
   turn its `Result` into the transport's success/error. No business logic in the wrapper.
+- **t3-env for all environment variables.** Read variables only through the `env` object from
+  `src/env.ts` (Convex: `<convex dir>/env.ts`). Every new variable is added to its schema and to
+  `.env.example`. Never read `process.env` or `import.meta.env` directly.
 - **TanStack Query** for every data fetch and mutation in the frontend. No `useEffect` fetching.
 - **TanStack Form** for every form, rendered with the shadcn `Field` components.
 - **TanStack Table** for every table; prefer the reui data grid on top of it.
