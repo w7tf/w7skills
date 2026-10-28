@@ -1,4 +1,4 @@
-import type { Result } from "better-result";
+import { Result } from "better-result";
 
 // The only thing a server function does with a core Result: return the value,
 // or throw the error. TanStack Start serializes thrown errors (with seroval) and
@@ -8,14 +8,12 @@ import type { Result } from "better-result";
 export function unwrapOrThrow<T, E extends Error & { _tag: string }>(
 	result: Result<T, E>,
 ): T {
-	return result.match({
-		ok: (value) => value,
-		err: (error) => {
-			// Keep the full error (cause, stack, payload) in the server logs only.
-			console.error(error);
-			throw toWireError(error);
-		},
-	});
+	// Do not throw inside `result.match`: better-result treats a throwing
+	// handler as a defect and turns it into a Panic.
+	if (Result.isOk(result)) return result.value;
+	// Keep the full error (cause, stack, payload) in the server logs only.
+	console.error(result.error);
+	throw toWireError(result.error);
 }
 
 // Seroval sends every own property of a thrown error to the browser, including

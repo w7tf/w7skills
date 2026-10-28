@@ -33,11 +33,16 @@ Core lives inside `src/server/` because it is server-only code.
 ## 3. TanStack Start specifics
 
 1. Copy [templates/result.ts](templates/result.ts) to `src/server/lib/result.ts`.
-2. Append [templates/AGENTS.tanstack-start.md](templates/AGENTS.tanstack-start.md) to the
-   project's `AGENTS.md`.
-3. Put the server-only secrets the server functions need (database URL, API keys) in the `server`
+2. Check which input validator method the installed TanStack Start has: newer versions use
+   `.inputValidator(...)`, older ones `.validator(...)`. Look it up in the installed types, e.g.
+   `grep -rl "inputValidator" node_modules/@tanstack/*start*/dist`; no match means `.validator`.
+   Use that method everywhere below, including the examples.
+3. Append [templates/AGENTS.tanstack-start.md](templates/AGENTS.tanstack-start.md) to the
+   project's `AGENTS.md`, replacing `.inputValidator` with `.validator` if step 2 found the
+   older method.
+4. Put the server-only secrets the server functions need (database URL, API keys) in the `server`
    schema of `src/env.ts`, and import `env` in core functions instead of reading `process.env`.
-4. If the project has auth, create `src/server/middleware.ts` with an `authMiddleware` built with
+5. If the project has auth, create `src/server/middleware.ts` with an `authMiddleware` built with
    `createMiddleware({ type: "function" })` that resolves the user and passes it on via
    `next({ context: { user } })`. If there is no auth yet, leave a comment in
    `src/server/middleware.ts` saying where it goes and skip it.
@@ -63,7 +68,7 @@ src/
 
 A wrapper does four things and nothing else:
 
-1. Validates input with the core module's `z<Name>Args` schema (`.inputValidator(...)`).
+1. Validates input with the core module's `z<Name>Args` schema (`.inputValidator(...)`, or `.validator(...)` on older TanStack Start versions).
 2. Gets auth and request context from middleware.
 3. Calls the core `<name>Fn(context, data)`.
 4. Returns `unwrapOrThrow(result)`: the value, or the core error thrown.

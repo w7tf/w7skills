@@ -42,7 +42,7 @@ created per request in the router factory, passed through router context, wrappe
 
    ```json
    "registries": {
-     "@reui": "https://reui.io/r/{name}.json"
+     "@reui": "https://reui.io/r/{style}/{name}.json"
    }
    ```
 
@@ -66,6 +66,11 @@ npx skills add anthropics/skills --skill frontend-design -y
 
 If the `skills` CLI is unavailable, copy `skills/frontend-design` from
 https://github.com/anthropics/skills into the project's `.agents/skills/` (or `.claude/skills/`).
+
+If the install is blocked (permission settings, sandbox, no network), do not stop and do not
+retry. Continue with the remaining steps, and in the final summary give the user the exact
+command above to run themselves. The same applies to every other `npx skills add` in the
+variant skills.
 
 ## 4. Scaffold the core folder and shared helpers
 

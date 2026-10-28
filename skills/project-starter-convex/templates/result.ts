@@ -1,4 +1,4 @@
-import type { Result } from "better-result";
+import { Result } from "better-result";
 import { ConvexError } from "convex/values";
 import { type SerializedError, serializeError } from "../core/errors";
 
@@ -8,12 +8,10 @@ import { type SerializedError, serializeError } from "../core/errors";
 export function unwrapOrThrow<T, E extends { _tag: string; message: string }>(
 	result: Result<T, E>,
 ): T {
-	return result.match({
-		ok: (value) => value,
-		err: (error) => {
-			// Keep the full error (cause, payload) in the Convex logs only.
-			console.error(error);
-			throw new ConvexError<SerializedError>(serializeError(error));
-		},
-	});
+	// Do not throw inside `result.match`: better-result treats a throwing
+	// handler as a defect and turns it into a Panic.
+	if (Result.isOk(result)) return result.value;
+	// Keep the full error (cause, payload) in the Convex logs only.
+	console.error(result.error);
+	throw new ConvexError<SerializedError>(serializeError(result.error));
 }
