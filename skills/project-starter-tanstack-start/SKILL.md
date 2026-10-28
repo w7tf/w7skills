@@ -69,9 +69,11 @@ A wrapper does four things and nothing else:
 4. Returns `unwrapOrThrow(result)`: the value, or the core error thrown.
 
 This follows TanStack Start's own error model: a server function throws, and the client gets the
-error rethrown. TanStack Start serializes thrown errors with seroval, so a better-result
-`TaggedError` arrives with its `_tag`, `message` and payload intact and works with `matchError`.
-A `Result` cannot be returned instead, because it is a class instance and fails serialization.
+error rethrown. A `Result` cannot be returned instead, because it is a class instance and fails
+serialization. TanStack Start serializes thrown errors with seroval, which would send every own
+property, including `stack` and `cause` (e.g. a database error), to the browser. So
+`unwrapOrThrow` logs the full error on the server and throws a plain `Error` with only `_tag` and
+`message`, which still works with `matchError` on the client.
 
 ```ts
 // src/server/core/todo.ts
@@ -114,7 +116,7 @@ export const completeTodo = createServerFn({ method: "POST" })
 // component
 const completeTodoMutation = useMutation({
 	mutationFn: (data: CompleteTodoArgs) => completeTodo({ data }),
-	// the thrown core error, rethrown on the client with `_tag` and `message`
+	// the core error, rethrown on the client with only `_tag` and `message`
 	onError: (error) => toast.error(error.message),
 });
 ```
