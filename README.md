@@ -8,12 +8,14 @@ Start, either with Convex as the backend or on its own:
 | `project-starter-convex` | New TanStack Start + Convex project |
 | `project-starter-tanstack-start` | New TanStack Start project without Convex |
 | `project-starter-core` | Shared base used by both (not run on its own) |
+| `asd-ste100` | ASD-STE100 Simplified Technical English as the communication model |
 
 Both starters run the core setup first and then add their backend layer:
 
 - **Core:** better-result with exhaustive error matching, t3-env for environment variables, business logic in a core folder as
   `<name>Fn` functions behind thin wrappers, TanStack Query / Form / Table, shadcn + reui, no
-  subtitles under headings unless asked, and the `frontend-design` skill installed.
+  subtitles under headings unless asked, the `frontend-design` skill installed, and
+  ASD-STE100 Simplified Technical English (the `asd-ste100` skill) as the communication model.
 - **TanStack Start:** `createServerFn` wrappers in `src/server/` over `src/server/core/<name>Fn`,
   throwing core errors the way TanStack Start expects.
 - **Convex:** the schema defined in Zod with `zodTable`, Convex query/mutation/action wrappers over `convex/core/<name>Fn`, TanStack Query
@@ -31,7 +33,7 @@ With the [skills CLI](https://skills.sh), from inside the new project:
 npx skills add w7tf/w7skills
 ```
 
-Install all three skills, since both starters load `project-starter-core`. Add `-g` to install
+Install all four skills, since both starters load `project-starter-core` and `asd-ste100`. Add `-g` to install
 them globally so every new project can use them.
 
 ## Use

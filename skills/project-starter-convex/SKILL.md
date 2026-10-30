@@ -89,7 +89,8 @@ backend capability, look for a component at https://www.convex.dev/components (o
 ## 5. Verify and report
 
 Run the typecheck, fix anything the setup broke, and summarize for the user as described in the
-core skill. Include whether `convex dev` still needs to be run by the user.
+core skill. Include whether `convex dev` still needs to be run by the user. Write the summary
+in ASD-STE100, as the `asd-ste100` skill says.
 
 ## The thin-wrapper pattern
 

@@ -1,5 +1,10 @@
 # Project rules
 
+## Communication: ASD-STE100
+
+- Write all prose in ASD-STE100 Simplified Technical English: replies, summaries, plans, docs, code comments, commit messages and PR text. Load and follow the `asd-ste100` skill.
+- Do not change code, identifiers, commands, paths or quoted tool output to fit the rules.
+
 ## Error handling: better-result
 
 - Core functions return `Result<T, E>` (or `Promise<Result<T, E>>`) from `better-result` instead of throwing.

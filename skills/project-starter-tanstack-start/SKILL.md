@@ -50,7 +50,7 @@ Core lives inside `src/server/` because it is server-only code.
 ## 4. Verify and report
 
 Run the typecheck, fix anything the setup broke, and summarize for the user as described in the
-core skill.
+core skill. Write the summary in ASD-STE100, as the `asd-ste100` skill says.
 
 ## The thin-wrapper pattern
 

@@ -1,6 +1,6 @@
 ---
 name: project-starter-core
-description: Shared setup and rules for every new w7 web project, which is always TanStack Start, with or without Convex (better-result, t3-env, core <name>Fn functions behind thin wrappers, TanStack Query/Form/Table, shadcn + reui, frontend-design skill). Used by project-starter-tanstack-start and project-starter-convex; run one of those instead of this directly.
+description: Shared setup and rules for every new w7 web project, which is always TanStack Start, with or without Convex (better-result, t3-env, core <name>Fn functions behind thin wrappers, TanStack Query/Form/Table, shadcn + reui, frontend-design skill, ASD-STE100 as the communication model). Used by project-starter-tanstack-start and project-starter-convex; run one of those instead of this directly.
 ---
 
 # Project starter: core
@@ -12,6 +12,12 @@ part (where the thin wrappers live and what they wrap).
 
 Run every step below against the target project. Do not just describe them. When a step is already
 done (dependency present, file exists), skip it and say so in the summary.
+
+## Communication
+
+Load the `asd-ste100` skill (installed alongside this one; if it is not, read
+`../asd-ste100/SKILL.md`) and follow it for all text you write during the setup: replies, the
+final summary, comments in scaffolded files and commit messages.
 
 ## 0. Detect the project
 
@@ -58,14 +64,16 @@ created per request in the router factory, passed through router context, wrappe
    date selectors, file upload, stepper, ...). Prefer reui over hand-built or plain shadcn
    equivalents.
 
-## 3. Install the frontend-design skill
+## 3. Install the frontend-design and asd-ste100 skills
 
 ```bash
 npx skills add anthropics/skills --skill frontend-design -y
+npx skills add w7tf/w7skills --skill asd-ste100 -y
 ```
 
 If the `skills` CLI is unavailable, copy `skills/frontend-design` from
-https://github.com/anthropics/skills into the project's `.agents/skills/` (or `.claude/skills/`).
+https://github.com/anthropics/skills into the project's `.agents/skills/` (or `.claude/skills/`). Copy `skills/asd-ste100` from
+https://github.com/w7tf/w7skills the same way.
 
 If the install is blocked (permission settings, sandbox, no network), do not stop and do not
 retry. Continue with the remaining steps, and in the final summary give the user the exact
@@ -133,3 +141,5 @@ These apply to all code written in the project afterwards.
   asks for one.
 - **frontend-design skill.** Load and follow the `frontend-design` skill whenever designing or
   restyling frontend UI.
+- **ASD-STE100 communication.** Load and follow the `asd-ste100` skill for all prose: replies,
+  summaries, plans, docs, code comments, commit messages and PR text.
